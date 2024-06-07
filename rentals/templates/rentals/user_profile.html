@@ -1,0 +1,33 @@
+{% extends 'rentals/base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">{{ user_profile.user.username }}'s Profile</h3>
+        </div>
+        <div class="card-body">
+            <p>First Name: {{ user_profile.first_name }}</p>
+            <p>Last Name: {{ user_profile.last_name }}</p>
+            <p>Phone Number: {{ user_profile.phone_number }}</p>
+            <h4>Owned Items</h4>
+            <ul class="list-group mb-3">
+                {% for item in owned_items %}
+                <li class="list-group-item">
+                    {{ item.name }} - {{ item.status }}
+                    {% for request in item.rental_requests.all %}
+                    {% if request.status == 'requested' %}
+                    <p>Requested by: <a href="{% url 'user_profile' request.requester.profile.id %}">{{ request.requester.username }}</a></p>
+                    {% elif request.status == 'rented' %}
+                    <p>Rented by: <a href="{% url 'user_profile' request.requester.profile.id %}">{{ request.requester.username }}</a></p>
+                    {% endif %}
+                    {% endfor %}
+                </li>
+                {% empty %}
+                <li class="list-group-item">No items owned.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

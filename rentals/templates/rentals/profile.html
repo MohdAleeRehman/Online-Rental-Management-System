@@ -1,0 +1,57 @@
+{% extends 'rentals/base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Profile</h3>
+        </div>
+        <div class="card-body">
+            <h4>Rental Requests</h4>
+            <ul class="list-group mb-3">
+                {% for request in rental_requests %}
+                <li class="list-group-item">
+                    {{ request.item.name }} - {{ request.status }}
+                    {% if request.status == 'requested' and request.item.status != 'rented' %}
+                    <form method="post" action="{% url 'cancel_request' request.pk %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm">Cancel</button>
+                    </form>
+                    {% endif %}
+                    {% if request.status == 'requested' %}
+                    <p>Requested from: <a href="{% url 'user_profile' request.item.owner.profile.id %}">{{ request.item.owner.username }}</a></p>
+                    {% elif request.status == 'rented' %}
+                    <p>Rented from: <a href="{% url 'user_profile' request.item.owner.profile.id %}">{{ request.item.owner.username }}</a></p>
+                    {% if not request.is_completed %}
+                        <a href="{% url 'confirm_return' request.id %}" class="btn btn-primary btn-sm">Confirm Return</a>
+                    {% endif %}
+                    {% endif %}
+                </li>
+                {% empty %}
+                <li class="list-group-item">No rental requests.</li>
+                {% endfor %}
+            </ul>
+            <h4>Owned Items</h4>
+            <ul class="list-group">
+                {% for item in owned_items %}
+                <li class="list-group-item">
+                    {{ item.name }} - {{ item.status }}
+                    {% for request in item.rental_requests.all %}
+                    {% if request.status == 'requested' %}
+                    <p>Requested by: <a href="{% url 'user_profile' request.requester.profile.id %}">{{ request.requester.username }}</a></p>
+                    {% elif request.status == 'rented'%}
+                    <p>Rented by: <a href="{% url 'user_profile' request.requester.profile.id %}">{{ request.requester.username }}</a></p>
+                    {% if not request.is_completed %}
+                        <a href="{% url 'confirm_return' request.id %}" class="btn btn-primary btn-sm">Confirm Return</a>
+                    {% endif %}    
+                    {% endif %}
+                    {% endfor %}
+                </li>
+                {% empty %}
+                <li class="list-group-item">No items owned.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends 'rentals/base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">{{ item.name }}</h3>
+        </div>
+        <div class="card-body">
+            <img src="{{ item.picture.url }}" alt="{{ item.name }}" class="img-fluid mb-3">
+            <p>{{ item.description }}</p>
+            <p>Price: ${{ item.rental_price }}</p>
+            <p>Keywords: {{ item.keywords }}</p>
+            <p>Owner: <a href="{% url 'user_profile' item.owner.profile.id %}">{{ item.owner.username }}</a></p>
+            {% if item.status == 'available' %}
+            <form method="post" action="{% url 'request_rental' item.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success">Request Rental</button>
+            </form>
+            {% else %}
+            <p class="text-danger">This item is currently {{ item.status }}.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
