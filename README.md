@@ -66,8 +66,8 @@ The Online Rental Management System is a web application designed to facilitate 
 
 1. Clone the repository:
     ```sh
-    git clone https://github.com/username/online-rental-management.git
-    cd online-rental-management
+    git clone https://github.com/MohdAleeRehman/Online-Rental-Management-System.git
+    cd Online-Rental-Management-System
     ```
 
 2. Install the dependencies:
