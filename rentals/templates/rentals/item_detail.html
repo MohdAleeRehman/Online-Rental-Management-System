@@ -13,10 +13,7 @@
             <p>Keywords: {{ item.keywords }}</p>
             <p>Owner: <a href="{% url 'user_profile' item.owner.profile.id %}">{{ item.owner.username }}</a></p>
             {% if item.status == 'available' %}
-            <form method="post" action="{% url 'request_rental' item.pk %}">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-success">Request Rental</button>
-            </form>
+            <a href="{% url 'request_rental' item.pk %}" class="btn btn-success">Request Rental</a>
             {% else %}
             <p class="text-danger">This item is currently {{ item.status }}.</p>
             {% endif %}

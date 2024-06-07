@@ -1,11 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Item, RentalRequest, Profile
-from .forms import ItemForm
-from django.contrib.auth import login, authenticate
-from .forms import UserRegistrationForm
+from .forms import ItemForm, UserRegistrationForm, UserProfileForm
+from django.contrib.auth import login, authenticate, update_session_auth_hash
 from django.db.models import Q
 from django.contrib import messages
+from django.contrib.auth.forms import PasswordChangeForm
+import os
 
 
 @login_required
@@ -42,8 +43,8 @@ def add_item(request):
 @login_required
 def request_rental(request, pk):
     item = get_object_or_404(Item, pk=pk)
+
     if request.method == "POST":
-        # Create the rental request
         RentalRequest.objects.create(
             item=item, requester=request.user, status="requested"
         )
@@ -51,6 +52,7 @@ def request_rental(request, pk):
         item.save()
         messages.success(request, "Rental request submitted.")
         return redirect("item_list")
+
     return render(request, "rentals/request_rental.html", {"item": item})
 
 
@@ -196,3 +198,66 @@ def confirm_return(request, rental_request_id):
         rental_request.save()
         messages.success(request, "Rented item has been returned to the owner, thank you!")
     return redirect("profile")
+
+
+@login_required
+def edit_item(request, pk):
+    item = get_object_or_404(Item, pk=pk, owner=request.user)
+    if request.method == "POST":
+        form = ItemForm(request.POST, request.FILES, instance=item)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Item updated successfully.")
+            return redirect("manage_items")
+    else:
+        form = ItemForm(instance=item)
+    return render(request, "rentals/edit_item.html", {"form": form})
+
+
+@login_required
+def delete_item(request, pk):
+    item = get_object_or_404(Item, pk=pk, owner=request.user)
+    if request.method == "POST":
+        if item.picture:
+            if os.path.isfile(item.picture.path):
+                os.remove(item.picture.path)
+        item.delete()
+        messages.success(request, "Item deleted successfully.")
+        return redirect("manage_items")
+    return render(request, "rentals/delete_item.html", {"item": item})
+
+
+@login_required
+def edit_profile(request):
+    if request.method == "POST":
+        form = UserProfileForm(request.POST, instance=request.user.profile)
+        if form.is_valid():
+            profile = form.save(commit=False)
+            request.user.email = form.cleaned_data.get("email")
+            request.user.save()
+            profile.save()
+            messages.success(request, "Your profile has been updated!")
+            return redirect("profile")
+    else:
+        form = UserProfileForm(
+            instance=request.user.profile, initial={"email": request.user.email}
+        )
+
+    return render(request, "rentals/edit_profile.html", {"form": form})
+
+
+@login_required
+def change_password(request):
+    if request.method == "POST":
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(
+                request, user
+            )  # Important for keeping the user logged in
+            messages.success(request, "Password changed successfully.")
+            return redirect("profile")
+    else:
+        form = PasswordChangeForm(request.user)
+
+    return render(request, "rentals/change_password.html", {"form": form})

@@ -7,11 +7,20 @@
             <h3 class="card-title">Profile</h3>
         </div>
         <div class="card-body">
+            <h4>User Information</h4>
+            <p><strong>Username:</strong> {{ user.username }}</p>
+            <p><strong>First Name:</strong> {{ user.profile.first_name }}</p>
+            <p><strong>Last Name:</strong> {{ user.profile.last_name }}</p>
+            <p><strong>Email:</strong> {{ user.email }}</p>
+            <p><strong>Phone Number:</strong> {{ user.profile.phone_number }}</p>
+            <a href="{% url 'edit_profile' %}" class="btn btn-info">Edit Profile</a>
+            <a href="{% url 'change_password' %}" class="btn btn-warning">Change Password</a>
+            
             <h4>Rental Requests</h4>
             <ul class="list-group mb-3">
                 {% for request in rental_requests %}
                 <li class="list-group-item">
-                    {{ request.item.name }} - {{ request.status }}
+                    <a href="{% url 'item_detail' request.item.pk %}"><strong>{{ request.item.name }}</strong></a> - {{ request.status }}
                     {% if request.status == 'requested' and request.item.status != 'rented' %}
                     <form method="post" action="{% url 'cancel_request' request.pk %}" class="d-inline">
                         {% csrf_token %}
@@ -35,7 +44,7 @@
             <ul class="list-group">
                 {% for item in owned_items %}
                 <li class="list-group-item">
-                    {{ item.name }} - {{ item.status }}
+                    <a href="{% url 'item_detail' item.pk %}"><strong>{{ item.name }}</strong></a> - {{ item.status }}
                     {% for request in item.rental_requests.all %}
                     {% if request.status == 'requested' %}
                     <p>Requested by: <a href="{% url 'user_profile' request.requester.profile.id %}">{{ request.requester.username }}</a></p>

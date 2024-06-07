@@ -1,5 +1,5 @@
 from django import forms
-from .models import Item, RentalRequest
+from .models import Item, RentalRequest, Profile
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 
@@ -13,6 +13,13 @@ class RentalRequestForm(forms.ModelForm):
     class Meta:
         model = RentalRequest
         fields = []
+
+class UserProfileForm(forms.ModelForm):
+    email = forms.EmailField()
+
+    class Meta:
+        model = Profile
+        fields = ['first_name', 'last_name', 'phone_number']
 
 class UserRegistrationForm(UserCreationForm):
     first_name = forms.CharField(max_length=30, required=True)
